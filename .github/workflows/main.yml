@@ -14,9 +14,9 @@ jobs:
       - name: Siapkan Node.js
         uses: actions/setup-node@v4
         with:
-        node-version: 20
+          node-version: 20
 
-      - name: Instal dependensi
+      - name: Install dependensi
         run: npm install
 
       - name: Build aplikasi web
