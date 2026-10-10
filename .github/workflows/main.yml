@@ -18,7 +18,7 @@ jobs:
 
       - name: Install dependensi
         run: npm install
-        --legacy-peer-deps
+ --legacy-peer-deps
 
       - name: Build aplikasi web
         run: npm run build
