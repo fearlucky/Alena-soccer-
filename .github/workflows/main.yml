@@ -10,6 +10,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
+      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
+
     steps:
       - name: Ambil kode aplikasi
         uses: actions/checkout@v4
@@ -25,15 +29,50 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Periksa proyek
+        run: |
+          if [ ! -f package.json ]; then
+            echo "ERROR: package.json tidak ditemukan"
+            exit 1
+          fi
+
       - name: Siapkan Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          echo "Memeriksa Android SDK..."
+          test -d "$ANDROID_HOME" || {
+            echo "Android SDK tidak ditemukan"
+            exit 1
+          }
+
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" \
+            -type f -name sdkmanager | head -n 1)
+
+          if [ -z "$SDKMANAGER" ]; then
+            echo "sdkmanager tidak ditemukan"
+            exit 1
+          fi
+
+          echo "SDK Manager: $SDKMANAGER"
+
+          yes | "$SDKMANAGER" --licenses || true
+
+          "$SDKMANAGER" --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
       - name: Install dependensi
         run: npm install --legacy-peer-deps
 
-      - name: Siapkan Capacitor
+      - name: Pasang Capacitor
         run: |
-          npm install @capacitor/core@^7 @capacitor/cli@^7 @capacitor/android@^7 --save --legacy-peer-deps
+          npm install @capacitor/core@^7 \
+            @capacitor/cli@^7 \
+            @capacitor/android@^7 \
+            --save --legacy-peer-deps
+
+      - name: Konfigurasi aplikasi Android
+        run: |
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.fearlucky.kasir",
@@ -44,6 +83,13 @@ jobs:
 
       - name: Build aplikasi web
         run: npm run build
+
+      - name: Periksa hasil web
+        run: |
+          if [ ! -f dist/index.html ]; then
+            echo "ERROR: dist/index.html tidak ditemukan"
+            exit 1
+          fi
 
       - name: Siapkan proyek Android
         run: npx cap add android
