@@ -17,24 +17,49 @@ jobs:
       - name: Siapkan Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
-      - name: Periksa file proyek
-        run: |
-          if [ ! -f package.json ]; then
-            echo "ERROR: package.json tidak ditemukan!"
-            exit 1
-          fi
+      - name: Siapkan Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Siapkan Android SDK
+        uses: android-actions/setup-android@v3
 
       - name: Install dependensi
         run: npm install --legacy-peer-deps
 
+      - name: Siapkan Capacitor
+        run: |
+          npm install @capacitor/core@^7 @capacitor/cli@^7 @capacitor/android@^7 --save --legacy-peer-deps
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.fearlucky.kasir",
+            "appName": "Kasir",
+            "webDir": "dist"
+          }
+          EOF
+
       - name: Build aplikasi web
         run: npm run build
 
-      - name: Simpan hasil build
+      - name: Siapkan proyek Android
+        run: npx cap add android
+
+      - name: Sinkronisasi Android
+        run: npx cap sync android
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Simpan APK
         uses: actions/upload-artifact@v4
         with:
-          name: kasir-web
-          path: dist/
+          name: kasir-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
