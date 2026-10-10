@@ -1,0 +1,6 @@
+{
+  "name": "Griyo POS - Kasir & Manajemen Stok Real-Time",
+  "description": "Aplikasi kasir (POS), manajemen stok barang, dan laporan penjualan real-time terintegrasi untuk toko dan usaha retail.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
