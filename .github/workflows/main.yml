@@ -2,6 +2,9 @@ name: Build Kasir APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -16,9 +19,15 @@ jobs:
         with:
           node-version: 20
 
+      - name: Periksa file proyek
+        run: |
+          if [ ! -f package.json ]; then
+            echo "ERROR: package.json tidak ditemukan!"
+            exit 1
+          fi
+
       - name: Install dependensi
-        run: npm install
- --legacy-peer-deps
+        run: npm install --legacy-peer-deps
 
       - name: Build aplikasi web
         run: npm run build
@@ -28,3 +37,4 @@ jobs:
         with:
           name: kasir-web
           path: dist/
+          if-no-files-found: error
